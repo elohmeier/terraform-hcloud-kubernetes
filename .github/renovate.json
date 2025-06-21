@@ -3,7 +3,6 @@
   "extends": [
     "config:recommended"
   ],
-  "separateMinorPatch": true,
   "automerge": true,
   "customManagers": [
     {
