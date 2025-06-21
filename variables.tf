@@ -697,7 +697,7 @@ variable "talos_extra_remote_manifests" {
 # Talos Backup
 variable "talos_backup_version" {
   type        = string
-  default     = "v0.1.0-beta.2-1-g9ccc125"
+  default     = "v0.1.0-beta.3"
   description = "Specifies the version of Talos Backup to be used in generated machine configurations."
 }
 
