@@ -39,6 +39,18 @@
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "{{{replace '^(.+)/(.+)$' '$1/packer-plugin-$2' depName}}}"
+    },
+    {
+      "description": "Update Kubernetes version",
+      "customType": "regex",
+      "fileMatch": [
+        "^variables\\.tf$"
+      ],
+      "matchStrings": [
+        "variable\\s+\"kubernetes_version\"\\s*{[^}]*default\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "kubernetes/kubernetes"
     }
   ]
 }
