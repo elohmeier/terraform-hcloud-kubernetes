@@ -773,7 +773,7 @@ variable "talos_backup_schedule" {
 # Kubernetes
 variable "kubernetes_version" {
   type        = string
-  default     = "v1.31.4"
+  default     = "v1.31.10"
   description = "Specifies the Kubernetes version to deploy."
 }
 
