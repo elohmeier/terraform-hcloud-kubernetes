@@ -51,6 +51,18 @@
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "kubernetes/kubernetes"
+    },
+    {
+      "description": "Update Talos version",
+      "customType": "regex",
+      "fileMatch": [
+        "^variables\\.tf$"
+      ],
+      "matchStrings": [
+        "variable\\s+\"talos_version\"\\s*{[^}]*default\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "siderolabs/talos"
     }
   ]
 }
