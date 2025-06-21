@@ -63,6 +63,25 @@
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "siderolabs/talos"
+    },
+    {
+      "description": "Update Talos Backup version",
+      "customType": "regex",
+      "fileMatch": [
+        "^variables\\.tf$"
+      ],
+      "matchStrings": [
+        "variable\\s+\"talos_backup_version\"\\s*{[^}]*default\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "siderolabs/talos-backup"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["github-tags"],
+      "matchPackageNames": ["siderolabs/talos-backup"],
+      "versioning": "loose"
     }
   ]
 }
