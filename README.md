@@ -80,6 +80,11 @@ This project includes commonly used and essential Kubernetes software, optimized
   </summary>
   Automates etcd snapshots and S3 storage for backup in Talos Linux-based Kubernetes clusters.
 - <summary>
+    <img align="center" alt="Easy" src="https://www.google.com/s2/favicons?domain=tailscale.com&sz=32" width="16" height="16">
+    <b><a href="https://github.com/siderolabs/extensions/tree/main/network/tailscale">Tailscale</a></b>
+  </summary>
+  Connects your team's devices and development environments for easy access to remote resources.
+- <summary>
     <img align="center" alt="Easy" src="https://www.google.com/s2/favicons?domain=hetzner.com&sz=32" width="16" height="16">
     <b><a href="https://github.com/hetznercloud/hcloud-cloud-controller-manager">Hcloud Cloud Controller Manager (CCM)</a></b>
   </summary>
@@ -600,6 +605,26 @@ talos_backup_schedule = "0 * * * *"
 To recover from a snapshot, please refer to the Talos Disaster Recovery section in the [Documentation](https://www.talos.dev/latest/advanced/disaster-recovery/#recovery).
 </details>
 
+<!-- Talos Tailscale -->
+<details>
+<summary><b>Talos Tailscale</b></summary>
+
+This module supports integrating [Tailscale](https://tailscale.com) as a Talos system extension, allowing you to connect your cluster nodes to your Tailscale network.
+
+Example `kubernetes.tf` snippet:
+```hcl
+talos_tailscale_enabled = true
+talos_tailscale_authkey = "<tailscale-auth-key>"
+
+# Optional: Extra environment variables
+talos_tailscale_extra_env = {
+  TS_ROUTES = "10.96.0.0/12"
+}
+```
+
+For a list of all available environment variables, please refer to the [Tailscale container documentation](https://tailscale.com/kb/1131/docker/#environment-variables).
+</details>
+
 <!-- Talos Bootstrap Manifests -->
 <details>
 <summary><b>Talos Bootstrap Manifests</b></summary>
@@ -625,6 +650,7 @@ ingress_nginx_enabled              = true  # Disabled by default
 longhorn_enabled                   = true  # Disabled by default
 metrics_server_enabled             = true  # Enabled by default
 prometheus_operator_crds_enabled   = true  # Enabled by default
+talos_tailscale_enabled            = true  # Disabled by default
 
 # Talos etcd backup is automatically enabled when any of the following S3 settings are defined
 talos_backup_s3_endpoint    = "https://..."

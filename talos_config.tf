@@ -13,6 +13,7 @@ locals {
     local.cert_manager_manifest != null ? [local.cert_manager_manifest] : [],
     local.ingress_nginx_manifest != null ? [local.ingress_nginx_manifest] : [],
     local.cluster_autoscaler_manifest != null ? [local.cluster_autoscaler_manifest] : [],
+    local.talos_tailscale_manifest != null ? [local.talos_tailscale_manifest] : [],
     var.talos_extra_inline_manifests != null ? var.talos_extra_inline_manifests : []
   )
   talos_manifests = concat(

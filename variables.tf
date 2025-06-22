@@ -694,6 +694,27 @@ variable "talos_extra_remote_manifests" {
   default     = null
 }
 
+# Talos Tailscale
+variable "talos_tailscale_enabled" {
+  type        = bool
+  default     = false
+  description = "Enables the Tailscale extension."
+}
+
+variable "talos_tailscale_authkey" {
+  type        = string
+  default     = null
+  sensitive   = true
+  description = "Tailscale auth key to use for login."
+}
+
+variable "talos_tailscale_extra_env" {
+  type        = map(string)
+  default     = {}
+  description = "Extra environment variables for Tailscale."
+}
+
+
 # Talos Backup
 variable "talos_backup_version" {
   type        = string
