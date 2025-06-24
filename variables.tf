@@ -714,6 +714,28 @@ variable "talos_tailscale_extra_env" {
   description = "Extra environment variables for Tailscale."
 }
 
+variable "talos_tailscale_magicdns_sans_enabled" {
+  type        = bool
+  default     = false
+  description = "Enables the use of Tailscale MagicDNS names as Subject Alternative Names (SANs) in the cluster certificates. This requires `talos_tailscale_tailnet_name` to be set."
+
+  validation {
+    condition     = !var.talos_tailscale_magicdns_sans_enabled || var.talos_tailscale_tailnet_name != null
+    error_message = "If `talos_tailscale_magicdns_sans_enabled` is true, `talos_tailscale_tailnet_name` must be set."
+  }
+}
+
+variable "talos_tailscale_tailnet_name" {
+  type        = string
+  default     = null
+  description = "The Tailscale tailnet name (e.g., 'foo-bar') to use for MagicDNS. Required if `talos_tailscale_magicdns_sans_enabled` is true."
+
+  validation {
+    condition     = var.talos_tailscale_tailnet_name == null || can(regex("^[a-z0-9-]+$", var.talos_tailscale_tailnet_name))
+    error_message = "The tailnet name must only contain lowercase letters, numbers, and hyphens."
+  }
+}
+
 
 # Talos Backup
 variable "talos_backup_version" {

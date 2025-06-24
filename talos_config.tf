@@ -40,6 +40,10 @@ locals {
           local.control_plane_private_ipv4_list,
           local.control_plane_public_ipv4_list,
           local.control_plane_public_ipv6_list,
+          # Tailscale MagicDNS
+          var.talos_tailscale_magicdns_sans_enabled ? [
+            for server_name in keys(hcloud_server.control_plane) : "${server_name}.${var.talos_tailscale_tailnet_name}.ts.net"
+          ] : [],
           # Other Addresses
           [var.kube_api_hostname],
           ["127.0.0.1", "::1", "localhost"],
