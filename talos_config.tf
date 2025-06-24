@@ -13,7 +13,7 @@ locals {
     local.cert_manager_manifest != null ? [local.cert_manager_manifest] : [],
     local.ingress_nginx_manifest != null ? [local.ingress_nginx_manifest] : [],
     local.cluster_autoscaler_manifest != null ? [local.cluster_autoscaler_manifest] : [],
-    local.talos_tailscale_manifest != null ? [local.talos_tailscale_manifest] : [],
+    # local.talos_tailscale_manifest has been moved to config_patches
     var.talos_extra_inline_manifests != null ? var.talos_extra_inline_manifests : []
   )
   talos_manifests = concat(
@@ -511,10 +511,11 @@ data "talos_machine_configuration" "control_plane" {
   kubernetes_version = var.kubernetes_version
   machine_type       = "controlplane"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  config_patches = [
-    yamlencode(local.control_plane_talos_config_patch[each.key]),
-    yamlencode(var.control_plane_config_patches)
-  ]
+  config_patches = compact(concat(
+    local.talos_tailscale_extensionserviceconfig != null ? [local.talos_tailscale_extensionserviceconfig] : [],
+    [yamlencode(local.control_plane_talos_config_patch[each.key])],
+    [yamlencode(var.control_plane_config_patches)]
+  ))
   docs     = false
   examples = false
 }
@@ -528,10 +529,11 @@ data "talos_machine_configuration" "worker" {
   kubernetes_version = var.kubernetes_version
   machine_type       = "worker"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  config_patches = [
-    yamlencode(local.worker_talos_config_patch[each.key]),
-    yamlencode(var.worker_config_patches)
-  ]
+  config_patches = compact(concat(
+    local.talos_tailscale_extensionserviceconfig != null ? [local.talos_tailscale_extensionserviceconfig] : [],
+    [yamlencode(local.worker_talos_config_patch[each.key])],
+    [yamlencode(var.worker_config_patches)]
+  ))
   docs     = false
   examples = false
 }
@@ -545,10 +547,11 @@ data "talos_machine_configuration" "cluster_autoscaler" {
   kubernetes_version = var.kubernetes_version
   machine_type       = "worker"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  config_patches = [
-    yamlencode(local.autoscaler_nodepool_talos_config_patch[each.key]),
-    yamlencode(var.cluster_autoscaler_config_patches)
-  ]
+  config_patches = compact(concat(
+    local.talos_tailscale_extensionserviceconfig != null ? [local.talos_tailscale_extensionserviceconfig] : [],
+    [yamlencode(local.autoscaler_nodepool_talos_config_patch[each.key])],
+    [yamlencode(var.cluster_autoscaler_config_patches)]
+  ))
   docs     = false
   examples = false
 }
