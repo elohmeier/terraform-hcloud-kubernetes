@@ -514,7 +514,7 @@ data "talos_machine_configuration" "control_plane" {
   config_patches = compact(concat(
     local.talos_tailscale_extensionserviceconfig != null ? [local.talos_tailscale_extensionserviceconfig] : [],
     [yamlencode(local.control_plane_talos_config_patch[each.key])],
-    [yamlencode(var.control_plane_config_patches)]
+    [for p in var.control_plane_config_patches : yamlencode(p)]
   ))
   docs     = false
   examples = false
@@ -532,7 +532,7 @@ data "talos_machine_configuration" "worker" {
   config_patches = compact(concat(
     local.talos_tailscale_extensionserviceconfig != null ? [local.talos_tailscale_extensionserviceconfig] : [],
     [yamlencode(local.worker_talos_config_patch[each.key])],
-    [yamlencode(var.worker_config_patches)]
+    [for p in var.worker_config_patches : yamlencode(p)]
   ))
   docs     = false
   examples = false
@@ -550,7 +550,7 @@ data "talos_machine_configuration" "cluster_autoscaler" {
   config_patches = compact(concat(
     local.talos_tailscale_extensionserviceconfig != null ? [local.talos_tailscale_extensionserviceconfig] : [],
     [yamlencode(local.autoscaler_nodepool_talos_config_patch[each.key])],
-    [yamlencode(var.cluster_autoscaler_config_patches)]
+    [for p in var.cluster_autoscaler_config_patches : yamlencode(p)]
   ))
   docs     = false
   examples = false
