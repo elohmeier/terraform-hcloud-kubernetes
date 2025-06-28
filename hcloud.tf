@@ -54,16 +54,15 @@ locals {
 }
 
 # Hcloud CSI
-data "helm_template" "hcloud_csi" {
+resource "helm_release" "hcloud_csi" {
   count = var.hcloud_csi_enabled ? 1 : 0
 
   name      = "hcloud-csi"
   namespace = "kube-system"
 
-  repository   = var.hcloud_csi_helm_repository
-  chart        = var.hcloud_csi_helm_chart
-  version      = var.hcloud_csi_helm_version
-  kube_version = var.kubernetes_version
+  repository = var.hcloud_csi_helm_repository
+  chart      = var.hcloud_csi_helm_chart
+  version    = var.hcloud_csi_helm_version
 
   values = [
     yamlencode({
@@ -95,11 +94,6 @@ data "helm_template" "hcloud_csi" {
     }),
     yamlencode(var.hcloud_csi_helm_values)
   ]
-}
 
-locals {
-  hcloud_csi_manifest = var.hcloud_csi_enabled ? {
-    name     = "hcloud-csi"
-    contents = data.helm_template.hcloud_csi[0].manifest
-  } : null
+  depends_on = [helm_release.cilium]
 }

@@ -4,15 +4,9 @@ locals {
   # Kubernetes Manifests for Talos
   talos_inline_manifests = concat(
     [local.hcloud_secret_manifest],
-    local.cilium_manifest != null ? [local.cilium_manifest] : [],
     local.hcloud_ccm_manifest != null ? [local.hcloud_ccm_manifest] : [],
-    local.hcloud_csi_manifest != null ? [local.hcloud_csi_manifest] : [],
     local.talos_backup_manifest != null ? [local.talos_backup_manifest] : [],
-    local.longhorn_manifest != null ? [local.longhorn_manifest] : [],
     local.metrics_server_manifest != null ? [local.metrics_server_manifest] : [],
-    local.cert_manager_manifest != null ? [local.cert_manager_manifest] : [],
-    local.ingress_nginx_manifest != null ? [local.ingress_nginx_manifest] : [],
-    local.cluster_autoscaler_manifest != null ? [local.cluster_autoscaler_manifest] : [],
     var.talos_extra_inline_manifests != null ? var.talos_extra_inline_manifests : []
   )
   talos_manifests = concat(
@@ -140,8 +134,13 @@ locals {
     for node in hcloud_server.control_plane : node.name => {
       machine = {
         install = {
-          image           = local.talos_installer_image_url
-          extraKernelArgs = var.talos_extra_kernel_args
+          image = local.talos_installer_image_url
+          extraKernelArgs = concat(
+            var.talos_extra_kernel_args,
+            var.victorialogs_enabled && var.talos_kernel_logging_enabled ? [
+              "talos.logging.kernel=udp://127.0.0.1:6050"
+            ] : [],
+          )
         }
         nodeLabels = merge(
           local.allow_scheduling_on_control_plane ? { "node.kubernetes.io/exclude-from-external-load-balancers" = { "$patch" = "delete" } } : {},
@@ -243,7 +242,15 @@ locals {
           servers = var.talos_time_servers
         }
         logging = {
-          destinations = var.talos_logging_destinations
+          destinations = concat(
+            var.talos_logging_destinations,
+            var.victorialogs_enabled ? [
+              {
+                endpoint = "udp://127.0.0.1:6051"
+                format   = "json_lines"
+              }
+            ] : [],
+          )
         }
       }
       cluster = {
@@ -303,8 +310,12 @@ locals {
     for node in hcloud_server.worker : node.name => {
       machine = {
         install = {
-          image           = local.talos_installer_image_url
-          extraKernelArgs = var.talos_extra_kernel_args
+          image = local.talos_installer_image_url
+          extraKernelArgs = concat(
+            var.talos_extra_kernel_args,
+            var.victorialogs_enabled && var.talos_kernel_logging_enabled ? [
+              "talos.logging.kernel=udp://127.0.0.1:6050"
+          ] : [])
         }
         nodeLabels      = local.worker_nodepools_map[node.labels.nodepool].labels
         nodeAnnotations = local.worker_nodepools_map[node.labels.nodepool].annotations
@@ -381,7 +392,15 @@ locals {
           servers = var.talos_time_servers
         }
         logging = {
-          destinations = var.talos_logging_destinations
+          destinations = concat(
+            var.talos_logging_destinations,
+            var.victorialogs_enabled ? [
+              {
+                endpoint = "udp://127.0.0.1:6051"
+                format   = "json_lines"
+              }
+            ] : [],
+          )
         }
       }
       cluster = {
@@ -404,8 +423,13 @@ locals {
     for nodepool in local.cluster_autoscaler_nodepools : nodepool.name => {
       machine = {
         install = {
-          image           = local.talos_installer_image_url
-          extraKernelArgs = var.talos_extra_kernel_args
+          image = local.talos_installer_image_url
+          extraKernelArgs = concat(
+            var.talos_extra_kernel_args,
+            var.victorialogs_enabled && var.talos_kernel_logging_enabled ? [
+              "talos.logging.kernel=udp://127.0.0.1:6050"
+            ] : [],
+          )
         }
         nodeLabels      = nodepool.labels
         nodeAnnotations = nodepool.annotations
@@ -482,7 +506,15 @@ locals {
           servers = var.talos_time_servers
         }
         logging = {
-          destinations = var.talos_logging_destinations
+          destinations = concat(
+            var.talos_logging_destinations,
+            var.victorialogs_enabled ? [
+              {
+                endpoint = "udp://127.0.0.1:6051"
+                format   = "json_lines"
+              }
+            ] : []
+          )
         }
       }
       cluster = {
@@ -510,10 +542,10 @@ data "talos_machine_configuration" "control_plane" {
   kubernetes_version = var.kubernetes_version
   machine_type       = "controlplane"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  config_patches = [
-    yamlencode(local.control_plane_talos_config_patch[each.key]),
-    yamlencode(var.control_plane_config_patches)
-  ]
+  config_patches = compact(concat(
+    [yamlencode(local.control_plane_talos_config_patch[each.key])],
+    [for p in var.control_plane_config_patches : yamlencode(p)]
+  ))
   docs     = false
   examples = false
 }
@@ -527,10 +559,10 @@ data "talos_machine_configuration" "worker" {
   kubernetes_version = var.kubernetes_version
   machine_type       = "worker"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  config_patches = [
-    yamlencode(local.worker_talos_config_patch[each.key]),
-    yamlencode(var.worker_config_patches)
-  ]
+  config_patches = compact(concat(
+    [yamlencode(local.worker_talos_config_patch[each.key])],
+    [for p in var.worker_config_patches : yamlencode(p)]
+  ))
   docs     = false
   examples = false
 }
@@ -544,10 +576,10 @@ data "talos_machine_configuration" "cluster_autoscaler" {
   kubernetes_version = var.kubernetes_version
   machine_type       = "worker"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  config_patches = [
-    yamlencode(local.autoscaler_nodepool_talos_config_patch[each.key]),
-    yamlencode(var.cluster_autoscaler_config_patches)
-  ]
+  config_patches = compact(concat(
+    [yamlencode(local.autoscaler_nodepool_talos_config_patch[each.key])],
+    [for p in var.cluster_autoscaler_config_patches : yamlencode(p)]
+  ))
   docs     = false
   examples = false
 }

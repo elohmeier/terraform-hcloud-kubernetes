@@ -1,12 +1,4 @@
 locals {
-  ingress_nginx_namespace = var.ingress_nginx_enabled ? {
-    apiVersion = "v1"
-    kind       = "Namespace"
-    metadata = {
-      name = data.helm_template.ingress_nginx[0].namespace
-    }
-  } : null
-
   ingress_nginx_replicas = coalesce(
     var.ingress_nginx_replicas,
     local.worker_sum < 4 ? 2 : 3
@@ -25,21 +17,23 @@ locals {
   ingress_nginx_service_node_port_https = 30001
 }
 
-data "helm_template" "ingress_nginx" {
+resource "helm_release" "ingress_nginx" {
   count = var.ingress_nginx_enabled ? 1 : 0
 
   name      = "ingress-nginx"
   namespace = "ingress-nginx"
 
-  repository   = var.ingress_nginx_helm_repository
-  chart        = var.ingress_nginx_helm_chart
-  version      = var.ingress_nginx_helm_version
-  kube_version = var.kubernetes_version
+  repository       = var.ingress_nginx_helm_repository
+  chart            = var.ingress_nginx_helm_chart
+  version          = var.ingress_nginx_helm_version
+  create_namespace = true
 
-  set {
-    name  = "controller.admissionWebhooks.certManager.enabled"
-    value = true
-  }
+  set = [
+    {
+      name  = "controller.admissionWebhooks.certManager.enabled"
+      value = true
+    }
+  ]
 
   values = [
     yamlencode({
@@ -117,16 +111,8 @@ data "helm_template" "ingress_nginx" {
     yamlencode(var.ingress_nginx_helm_values)
   ]
 
-  depends_on = [hcloud_load_balancer_network.ingress]
-}
-
-locals {
-  ingress_nginx_manifest = var.ingress_nginx_enabled ? {
-    name     = "ingress-nginx"
-    contents = <<-EOF
-      ${yamlencode(local.ingress_nginx_namespace)}
-      ---
-      ${data.helm_template.ingress_nginx[0].manifest}
-    EOF
-  } : null
+  depends_on = [
+    helm_release.cert_manager,
+    hcloud_load_balancer_network.ingress
+  ]
 }

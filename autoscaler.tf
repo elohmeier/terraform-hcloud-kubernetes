@@ -16,61 +16,63 @@ locals {
   } : null
 }
 
-data "helm_template" "cluster_autoscaler" {
+resource "helm_release" "cluster_autoscaler" {
   count = local.cluster_autoscaler_enabled ? 1 : 0
 
   name      = "cluster-autoscaler"
   namespace = "kube-system"
 
-  repository   = var.cluster_autoscaler_helm_repository
-  chart        = var.cluster_autoscaler_helm_chart
-  version      = var.cluster_autoscaler_helm_version
-  kube_version = var.kubernetes_version
+  repository       = var.cluster_autoscaler_helm_repository
+  chart            = var.cluster_autoscaler_helm_chart
+  version          = var.cluster_autoscaler_helm_version
+  create_namespace = true
 
-  set {
-    name  = "image.tag"
-    value = "v1.31.1"
-  }
-  set {
-    name  = "cloudProvider"
-    value = "hetzner"
-  }
-  set {
-    name  = "extraEnvSecrets.HCLOUD_TOKEN.name"
-    value = "hcloud"
-  }
-  set {
-    name  = "extraEnvSecrets.HCLOUD_TOKEN.key"
-    value = "token"
-  }
-  set {
-    name  = "extraEnv.HCLOUD_CLUSTER_CONFIG"
-    value = base64encode(jsonencode(local.cluster_autoscaler_cluster_config))
-  }
-  set {
-    name  = "extraEnv.HCLOUD_SERVER_CREATION_TIMEOUT"
-    value = 10
-  }
-  set {
-    name  = "extraEnv.HCLOUD_FIREWALL"
-    value = hcloud_firewall.this.id
-  }
-  set {
-    name  = "extraEnv.HCLOUD_SSH_KEY"
-    value = hcloud_ssh_key.this.id
-  }
-  set {
-    name  = "extraEnv.HCLOUD_PUBLIC_IPV4"
-    value = var.talos_public_ipv4_enabled
-  }
-  set {
-    name  = "extraEnv.HCLOUD_PUBLIC_IPV6"
-    value = var.talos_public_ipv6_enabled
-  }
-  set {
-    name  = "extraEnv.HCLOUD_NETWORK"
-    value = hcloud_network_subnet.autoscaler.network_id
-  }
+  set = [
+    {
+      name  = "image.tag"
+      value = "v1.31.1"
+    },
+    {
+      name  = "cloudProvider"
+      value = "hetzner"
+    },
+    {
+      name  = "extraEnvSecrets.HCLOUD_TOKEN.name"
+      value = "hcloud"
+    },
+    {
+      name  = "extraEnvSecrets.HCLOUD_TOKEN.key"
+      value = "token"
+    },
+    {
+      name  = "extraEnv.HCLOUD_CLUSTER_CONFIG"
+      value = base64encode(jsonencode(local.cluster_autoscaler_cluster_config))
+    },
+    {
+      name  = "extraEnv.HCLOUD_SERVER_CREATION_TIMEOUT"
+      value = 10
+    },
+    {
+      name  = "extraEnv.HCLOUD_FIREWALL"
+      value = hcloud_firewall.this.id
+    },
+    {
+      name  = "extraEnv.HCLOUD_SSH_KEY"
+      value = hcloud_ssh_key.this.id
+    },
+    {
+      name  = "extraEnv.HCLOUD_PUBLIC_IPV4"
+      value = var.talos_public_ipv4_enabled
+    },
+    {
+      name  = "extraEnv.HCLOUD_PUBLIC_IPV6"
+      value = var.talos_public_ipv6_enabled
+    },
+    {
+      name  = "extraEnv.HCLOUD_NETWORK"
+      value = hcloud_network_subnet.autoscaler.network_id
+    }
+  ]
 
   values = [
     yamlencode({
@@ -114,14 +116,8 @@ data "helm_template" "cluster_autoscaler" {
   ]
 
   depends_on = [
+    helm_release.cilium,
     terraform_data.amd64_image,
     terraform_data.arm64_image,
   ]
-}
-
-locals {
-  cluster_autoscaler_manifest = local.cluster_autoscaler_enabled ? {
-    name     = "cluster-autoscaler"
-    contents = data.helm_template.cluster_autoscaler[0].manifest
-  } : null
 }

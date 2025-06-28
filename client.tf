@@ -21,6 +21,19 @@ locals {
     cert      = base64decode(data.talos_client_configuration.this.client_configuration.client_certificate)
     key       = base64decode(data.talos_client_configuration.this.client_configuration.client_key)
   }
+
+  minio_client_config = var.talos_backup_s3_enabled || (var.longhorn_enabled && var.longhorn_backup_s3_enabled) || (var.argo_workflows_enabled && var.argo_workflows_artifact_s3_enabled) ? {
+    version = "10"
+    aliases = {
+      "hetzner" = {
+        url       = "https://${coalesce(var.s3_location, local.control_plane_nodepools[0].location)}.your-objectstorage.com"
+        accessKey = var.s3_admin_access_key
+        secretKey = var.s3_admin_secret_key
+        api       = "S3v4"
+        path      = "auto"
+      }
+    }
+  } : null
 }
 
 data "talos_client_configuration" "this" {
@@ -35,6 +48,42 @@ resource "talos_cluster_kubeconfig" "this" {
   node                 = local.talos_primary_endpoint
 
   depends_on = [talos_machine_configuration_apply.control_plane]
+}
+
+resource "terraform_data" "create_minio_config" {
+  count = local.minio_client_config != null ? 1 : 0
+
+  triggers_replace = [
+    sha1(jsonencode(local.minio_client_config))
+  ]
+
+  provisioner "local-exec" {
+    when    = create
+    quiet   = true
+    command = <<-EOT
+      set -eu
+
+      mkdir -p .mc
+      printf '%s' "$MINIO_CONFIG_CONTENT" > .mc/config.json
+      chmod 600 .mc/config.json
+    EOT
+    environment = {
+      MINIO_CONFIG_CONTENT = jsonencode(local.minio_client_config)
+    }
+  }
+
+  provisioner "local-exec" {
+    when       = destroy
+    quiet      = true
+    on_failure = continue
+    command    = <<-EOT
+      set -eu
+
+      if [ -f ".mc/config.json" ]; then
+        cp -f ".mc/config.json" ".mc/config.json.bak"
+      fi
+    EOT
+  }
 }
 
 resource "terraform_data" "create_talosconfig" {

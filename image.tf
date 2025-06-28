@@ -38,7 +38,7 @@ locals {
     concat(
       ["siderolabs/qemu-guest-agent"],
       var.talos_image_extensions,
-      var.longhorn_enabled ? local.talos_image_extentions_longhorn : []
+      var.longhorn_enabled ? local.talos_image_extentions_longhorn : [],
     )
   )
 }

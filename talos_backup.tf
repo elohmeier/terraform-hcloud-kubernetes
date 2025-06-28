@@ -1,8 +1,13 @@
 locals {
-  talos_backup_s3_hcloud   = var.talos_backup_s3_hcloud_url != null ? regex("^(?:https?://)?(?P<bucket>[^.]+)\\.(?P<region>[^.]+)\\.your-objectstorage\\.com\\.?$", var.talos_backup_s3_hcloud_url) : {}
-  talos_backup_s3_bucket   = var.talos_backup_s3_hcloud_url != null ? local.talos_backup_s3_hcloud.bucket : var.talos_backup_s3_bucket
-  talos_backup_s3_region   = var.talos_backup_s3_hcloud_url != null ? local.talos_backup_s3_hcloud.region : var.talos_backup_s3_region
-  talos_backup_s3_endpoint = var.talos_backup_s3_hcloud_url != null ? "https://${local.talos_backup_s3_region}.your-objectstorage.com" : var.talos_backup_s3_endpoint
+  # Use auto-created bucket name if bucket is not explicitly provided
+  talos_backup_s3_bucket_name = var.talos_backup_s3_bucket != null ? var.talos_backup_s3_bucket : (
+    var.talos_backup_s3_enabled ? "${var.cluster_name}-talos-backup" : null
+  )
+
+  talos_backup_s3_bucket   = local.talos_backup_s3_bucket_name
+  talos_backup_s3_location = coalesce(var.s3_location, local.control_plane_nodepools[0].location)
+  talos_backup_s3_region   = var.talos_backup_s3_enabled ? local.location_to_zone[local.talos_backup_s3_location] : null
+  talos_backup_s3_endpoint = var.talos_backup_s3_enabled ? "https://${local.talos_backup_s3_location}.your-objectstorage.com" : null
 
   talos_backup_service_account = {
     apiVersion = "talos.dev/v1alpha1"
@@ -27,8 +32,8 @@ locals {
     }
     type = "Opaque"
     data = {
-      access_key = base64encode(var.talos_backup_s3_access_key)
-      secret_key = base64encode(var.talos_backup_s3_secret_key)
+      access_key = base64encode(var.talos_backup_s3_enabled ? var.s3_admin_access_key : "")
+      secret_key = base64encode(var.talos_backup_s3_enabled ? var.s3_admin_secret_key : "")
     }
   }
 
@@ -106,4 +111,25 @@ locals {
       ${yamlencode(local.talos_backup_cronjob)}
     EOF
   } : null
+}
+
+# Auto-create S3 bucket for Talos backup when enabled
+resource "minio_s3_bucket" "talos_backup" {
+  count = var.talos_backup_s3_enabled && var.talos_backup_s3_bucket == null ? 1 : 0
+
+  bucket         = "${var.cluster_name}-talos-backup"
+  acl            = "private"
+  object_locking = false
+}
+
+resource "minio_ilm_policy" "talos_backup" {
+  count = var.talos_backup_s3_enabled && var.talos_backup_s3_bucket == null ? 1 : 0
+
+  bucket = minio_s3_bucket.talos_backup[0].bucket
+
+  rule {
+    id         = "expire-30d"
+    status     = "Enabled"
+    expiration = "30d"
+  }
 }
