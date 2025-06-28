@@ -4,7 +4,7 @@
   <h1>Hcloud Kubernetes</h1>
 
   <p>
-    Terraform Module to deploy Kubernetes on Hetzner Cloud! 
+    Terraform Module to deploy Kubernetes on Hetzner Cloud!
   </p>
 
 <!-- Badges -->
@@ -688,7 +688,7 @@ talos_extra_inline_manifests = [
 
 Talos supports two node discovery mechanisms:
 
-- **Discovery Service Registry** (default): A public, external registry operated by Sidero Labs that works even when Kubernetes is unavailable. Nodes must have outbound access to TCP port 443 to communicate with it.  
+- **Discovery Service Registry** (default): A public, external registry operated by Sidero Labs that works even when Kubernetes is unavailable. Nodes must have outbound access to TCP port 443 to communicate with it.
 - **Kubernetes Registry**: Relies on Kubernetes Node metadata stored in etcd.
 
 This module uses the discovery service to perform additional health checks during Talos upgrades, Kubernetes upgrades, and Kubernetes manifest synchronization. If no discovery mechanism is enabled, these additional checks will be skipped.
@@ -733,7 +733,7 @@ In this module, upgrades are conducted with care and conservatism. You will cons
 - HCSI: https://github.com/hetznercloud/csi-driver/blob/main/docs/kubernetes/README.md#versioning-policy
 - Longhorn: https://longhorn.io/docs/1.7.2/best-practices/#kubernetes-version
 - Cilium: https://github.com/cilium/cilium/blob/v1.15/Documentation/network/kubernetes/requirements.rst#kubernetes-version
-- Ingress Nginx: https://github.com/kubernetes/ingress-nginx?tab=readme-ov-file#supported-versions-table 
+- Ingress Nginx: https://github.com/kubernetes/ingress-nginx?tab=readme-ov-file#supported-versions-table
 - Cert Manager: https://cert-manager.io/docs/releases/
 - Autoscaler: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/README.md#releases
 -->
