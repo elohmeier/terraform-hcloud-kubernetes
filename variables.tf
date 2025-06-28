@@ -1736,7 +1736,7 @@ variable "argocd_helm_chart" {
 
 variable "argocd_helm_version" {
   type        = string
-  default     = "8.1.1"
+  default     = "8.1.2"
   description = "Version of the Argo CD Helm chart to deploy."
 }
 
