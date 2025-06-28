@@ -1456,7 +1456,7 @@ variable "tailscale_helm_chart" {
 
 variable "tailscale_helm_version" {
   type        = string
-  default     = "1.84.2"
+  default     = "1.84.3"
   description = "Version of the Tailscale Operator Helm chart to deploy."
 }
 
