@@ -1883,7 +1883,7 @@ variable "victoriametrics_helm_chart" {
 
 variable "victoriametrics_helm_version" {
   type        = string
-  default     = "0.55.0"
+  default     = "0.55.2"
   description = "Version of the VictoriaMetrics K8s Stack Helm chart to deploy."
 }
 
