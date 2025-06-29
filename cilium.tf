@@ -29,6 +29,14 @@ data "helm_template" "cilium" {
       value = local.native_routing_cidr
     },
     {
+      name  = "enableIPv4BIGTCP"
+      value = true
+    },
+    {
+      name  = "enableIPv6BIGTCP"
+      value = true
+    },
+    {
       name  = "kubeProxyReplacement"
       value = true
     },
@@ -40,11 +48,10 @@ data "helm_template" "cilium" {
       name  = "bpf.masquerade"
       value = true
     },
-    # Netkit requires kernel >= 6.8
-    # {
-    #   name  = "bpf.datapathMode"
-    #   value = "netkit"
-    # },
+    {
+      name  = "bpf.datapathMode"
+      value = "netkit"
+    },
     {
       name  = "loadBalancer.acceleration"
       value = "native"
@@ -53,7 +60,18 @@ data "helm_template" "cilium" {
       name  = "installNoConntrackIptablesRules"
       value = true
     },
-
+    {
+      name  = "bpf.distributedLRU.enabled"
+      value = true
+    },
+    {
+      name  = "bpf.mapDynamicSizeRatio"
+      value = "0.08"
+    },
+    {
+      name  = "bpfClockProbe"
+      value = true
+    },
     {
       name  = "egressGateway.enabled"
       value = var.cilium_egress_gateway_enabled
