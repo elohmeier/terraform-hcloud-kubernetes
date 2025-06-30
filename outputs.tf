@@ -68,3 +68,13 @@ output "worker_public_ipv6_list" {
   description = "Public IPv6 addresses of all worker nodes"
   value       = local.worker_public_ipv6_list
 }
+
+output "ingress_load_balancer_public_ipv4" {
+  description = "Public IPv4 address of the main ingress load balancer"
+  value       = local.ingress_service_load_balancer_public_ipv4
+}
+
+output "ingress_load_balancer_public_ipv6" {
+  description = "Public IPv6 address of the main ingress load balancer"
+  value       = local.ingress_service_load_balancer_public_ipv6
+}
