@@ -108,6 +108,9 @@ data "helm_template" "ingress_nginx" {
             )
             compute-full-forwarded-for = true
             use-proxy-protocol         = true
+
+            # cert-manager compatibility
+            strict-validate-path-type = false
           },
           var.ingress_nginx_config
         )
