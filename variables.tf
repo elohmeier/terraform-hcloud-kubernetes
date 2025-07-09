@@ -493,7 +493,7 @@ variable "cluster_autoscaler_config_patches" {
 # Talos
 variable "talos_version" {
   type        = string
-  default     = "v1.10.4"
+  default     = "v1.10.5"
   description = "Specifies the version of Talos to be used in generated machine configurations."
 }
 
