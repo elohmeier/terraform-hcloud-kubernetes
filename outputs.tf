@@ -69,6 +69,16 @@ output "worker_public_ipv6_list" {
   value       = local.worker_public_ipv6_list
 }
 
+output "ingress_service_load_balancer_public_ipv4" {
+  description = "Public IPv4 address of the main ingress load balancer"
+  value       = local.ingress_service_load_balancer_public_ipv4
+}
+
+output "ingress_service_load_balancer_public_ipv6" {
+  description = "Public IPv6 address of the main ingress load balancer"
+  value       = local.ingress_service_load_balancer_public_ipv6
+}
+
 output "cilium_encryption_info" {
   description = "Information about Cilium traffic encryption"
   value = {
@@ -84,4 +94,24 @@ output "cilium_encryption_info" {
       namespace      = local.cilium_ipsec_keys_manifest.metadata["namespace"]
     } : {}
   }
+}
+
+output "network_ipv4_cidr" {
+  description = "Main IPv4 CIDR block for the network"
+  value       = var.network_ipv4_cidr
+}
+
+output "network_node_ipv4_cidr" {
+  description = "Node IPv4 CIDR used for allocating IP addresses to both Control Plane and Worker nodes"
+  value       = local.node_ipv4_cidr
+}
+
+output "network_service_ipv4_cidr" {
+  description = "Service IPv4 CIDR block used for allocating ClusterIPs to services"
+  value       = local.service_ipv4_cidr
+}
+
+output "network_pod_ipv4_cidr" {
+  description = "Pod IPv4 CIDR block allocated for use by pods within the cluster"
+  value       = local.pod_ipv4_cidr
 }
