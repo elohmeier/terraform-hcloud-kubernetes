@@ -824,6 +824,12 @@ variable "kubernetes_kubelet_extra_config" {
   description = "Specifies additional configuration settings for the kubelet service. These settings can customize or override default kubelet configurations, allowing for tailored cluster behavior."
 }
 
+variable "kubernetes_kubelet_cluster_dns" {
+  type        = list(string)
+  default     = ["10.0.96.10"]
+  description = "Specifies the list of IP addresses for the cluster DNS servers. If not set, the kubelet will use the cluster's default DNS settings. The IP addresses should typically be within the service subnet range."
+}
+
 
 # Kubernetes API
 variable "kube_api_hostname" {

@@ -218,6 +218,9 @@ locals {
                 ephemeral-storage = "1Gi"
               }
             },
+            {
+              clusterDNS = var.kubernetes_kubelet_cluster_dns
+            },
             var.kubernetes_kubelet_extra_config
           )
           extraMounts = local.talos_kubelet_extra_mounts
@@ -365,6 +368,9 @@ locals {
                 ephemeral-storage = "1Gi"
               }
             },
+            {
+              clusterDNS = var.kubernetes_kubelet_cluster_dns
+            },
             var.kubernetes_kubelet_extra_config
           )
           extraMounts = local.talos_kubelet_extra_mounts
@@ -464,6 +470,9 @@ locals {
                 memory            = "350Mi"
                 ephemeral-storage = "1Gi"
               }
+            },
+            {
+              clusterDNS = var.kubernetes_kubelet_cluster_dns
             },
             var.kubernetes_kubelet_extra_config
           )
